@@ -1,11 +1,24 @@
 name: Installing Python
 
-on: [push]
+on: 
+  workflow_dispatch:
+  schedule:
+    - cron: "*/5 * * * *"
+  push:
+    branches-ignore: 
+      - feature/*     
+      - test/**      
+  pull_request:
+    types:
+      - opened
+    paths-ignore:
+      - requirements.txt
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
-
+    concurrency: 
+      group: python-job
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
@@ -16,6 +29,8 @@ jobs:
 
     steps:
     - name: Set up Python
+      if: runner.os == 'Linux'
+      timeout-minutes: 10
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.py-version }}
